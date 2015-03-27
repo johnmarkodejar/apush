@@ -2,7 +2,6 @@ var tok;
 if (Meteor.isClient) {
   // counter starts at 0
 Session.setDefault('counter', 0);
-http.call("GET","http://bella2.zenchi.co/gcm2.php",{params:{title:"Push Notification"}},function(result){console.log(result);});
 Push.addListener('token', function(token) {
   	tok = JSON.stringify(token);
   	 console.log(tok);
@@ -11,7 +10,21 @@ Push.addListener('token', function(token) {
 		ses = Session.get("counter");
 		if(ses >= 60){
 		   Session.set("counter",0);
-		   
+ 		   
+
+		var res = Push.send({
+		  from: 'JM',
+		  title: 'Push Using Push',
+		  text: 'It is Time!',
+		  query: {},
+		  token:tok
+		});
+		console.log(res);
+		Push.allow({
+			send: function(userId, notification) {
+			    return true; // Allow all users to send
+			}
+		    });
 		}else{
 		   Session.set("counter",ses + 1);
 		}
@@ -19,20 +32,18 @@ Push.addListener('token', function(token) {
 		$("#result").html("Token: "+tok);
 	  },1000);
 	
-  /*
-  Template.hello.events({
-    'click button': function () {
-      // increment the counter when button is clicked
-      Session.set('counter', Session.get('counter') + 1);
-      var res = HTTP.call("GET","",{params:{title:"Push Notification"}},function(result){console.log(result);});
-    }
-  });
-  */
+
+
+
 }
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
 	
   });
-  
+  Meteor.methods({
+  'remoteGet' : function(url,options){
+    return HTTP.get(url,options);
+  }
+});
 }
